@@ -4,16 +4,19 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="2024-02-21-create-message-table-seq" author="emil">
-        <createSequence sequenceName="message_seq"/>
+    <changeSet id="2024-02-21-create-messages-table-seq" author="emil">
+        <createSequence sequenceName="messages_seq"/>
     </changeSet>
 
-    <changeSet id="2024-02-21-create-message-table" author="emil">
-        <createTable tableName="message">
+    <changeSet id="2024-02-21-create-messages-table" author="emil">
+        <createTable tableName="messages">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="content" type="varchar(255)">
+            <column name="content" type="VARCHAR(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
