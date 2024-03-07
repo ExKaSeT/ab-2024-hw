@@ -17,4 +17,5 @@ public class MessageDto implements Serializable {
     private String content;
     private LocalDateTime lastModifiedDate;
     private List<ImageDto> imageMetas;
+    private String userUsername;
 }

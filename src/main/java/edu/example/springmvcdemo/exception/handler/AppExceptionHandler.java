@@ -3,7 +3,6 @@ package edu.example.springmvcdemo.exception.handler;
 import edu.example.springmvcdemo.exception.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -24,13 +23,6 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleException(ConstraintViolationException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("errors", List.of(ex.getMessage()));
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Object> handleException(DataIntegrityViolationException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("errors", List.of(ex.getRootCause().getMessage()));
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
