@@ -15,7 +15,7 @@ public class SchedulingConfig {
 
     private final RefreshTokenService tokenService;
 
-    @Scheduled(cron = "${scheduler.deleteExpiredTokensCron}", zone = "UTC")
+    @Scheduled(cron = "${scheduler.deleteExpiredTokensCron}")
     public void deleteExpiredRefreshTokens() {
         tokenService.deleteExpiredRefreshTokens();
     }
