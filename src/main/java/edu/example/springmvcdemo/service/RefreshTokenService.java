@@ -18,7 +18,6 @@ import java.util.Optional;
 import static edu.example.springmvcdemo.security.jwt.JwtProperties.JWT_REFRESH_COOKIE_NAME;
 import static java.util.Objects.nonNull;
 
-// TODO: Add scheduler to remove expired tokens
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
@@ -60,5 +59,11 @@ public class RefreshTokenService {
         }
 
         return tokenCookieOpt.map(Cookie::getValue).orElse(null);
+    }
+
+    @Transactional
+    public void deleteExpiredRefreshTokens() {
+        var currentDateUtc0 = LocalDateTime.ofInstant(Instant.now(), ZoneId.of("Z"));
+        tokenRepository.deleteAllByValidUntilUtc0IsLessThan(currentDateUtc0);
     }
 }

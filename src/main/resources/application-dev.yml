@@ -41,3 +41,7 @@ minio:
     password: minioadmin
     url: http://127.0.0.1:9000
   bucket-name: data
+
+scheduler:
+  enabled: true
+  deleteExpiredTokensCron: "*/15 * * * * *"
