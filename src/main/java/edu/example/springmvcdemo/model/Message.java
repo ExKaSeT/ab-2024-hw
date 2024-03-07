@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
 @Table(name = "messages")
+@Data
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "messages_seq")
@@ -32,4 +32,13 @@ public class Message {
             joinColumns = @JoinColumn(name = "message_id"),
             inverseJoinColumns = @JoinColumn(name = "image_link"))
     private List<Image> images;
+
+    @Column(insertable = false, updatable = false, name = "user_username")
+    private String userUsername;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_username")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private User user;
 }

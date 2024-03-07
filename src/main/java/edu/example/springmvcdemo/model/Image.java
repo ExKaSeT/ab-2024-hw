@@ -7,8 +7,8 @@ import lombok.ToString;
 import java.util.List;
 
 @Entity
-@Data
 @Table(name = "images")
+@Data
 public class Image {
     /**
      Object name in storage

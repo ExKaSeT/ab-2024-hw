@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2024-03-06-link-messages-to-users" author="emil">
+        <addColumn tableName="messages">
+            <column name="user_username" type="VARCHAR(30)"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="messages"
+                                 baseColumnNames="user_username"
+                                 constraintName="fk_messages_user_username"
+                                 referencedTableName="users"
+                                 referencedColumnNames="username"/>
+
+        <createIndex tableName="messages" indexName="idx_messages_user_username">
+            <column name="user_username"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
