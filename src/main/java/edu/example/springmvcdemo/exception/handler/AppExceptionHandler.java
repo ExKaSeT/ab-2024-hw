@@ -21,16 +21,12 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> handleException(ConstraintViolationException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("errors", List.of(ex.getMessage()));
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(createBody(ex), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("errors", List.of(ex.getMessage()));
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(createBody(ex), HttpStatus.NOT_FOUND);
     }
 
     @Override
@@ -45,5 +41,9 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
                         .filter(s -> !s.isBlank())
                         .toList());
         return new ResponseEntity<>(body, status);
+    }
+
+    private Map<String, Object> createBody(Throwable exception) {
+        return new HashMap<>(Map.of("errors", List.of(exception.getMessage())));
     }
 }
