@@ -15,7 +15,6 @@ public class RefreshToken {
     @SequenceGenerator(name = "refresh_tokens_seq", sequenceName = "refresh_tokens_seq", allocationSize = 1)
     private Long id;
 
-
     /**
      Valid until datetime in UTC+0:00
      */
@@ -26,7 +25,7 @@ public class RefreshToken {
     private boolean wasUsed;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_username")
+    @JoinColumn(name = "user_username", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User user;

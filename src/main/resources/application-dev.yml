@@ -11,15 +11,6 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/mongo
-    redis:
-      host: localhost
-      port: 6379
-      password: redis
-      uri: redis://localhost:6379
-
   messages:
     basename: i18n/messages
 

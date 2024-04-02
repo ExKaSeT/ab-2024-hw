@@ -11,28 +11,6 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql/data
 
-  mongo:
-    image: mongo:7.0.5
-    container_name: mongo
-    environment:
-      MONGO_INITDB_DATABASE: mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - ./environment/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-      - mongo-data:/data/db
-      - mongo-config:/data/configdb
-
-  redis:
-    image: redis:7.2-rc-alpine
-    restart: always
-    container_name: redis
-    ports:
-      - "6379:6379"
-    command: redis-server --logLevel warning --requirepass redis
-    volumes:
-      - redis-data:/data
-
   minio:
     image: quay.io/minio/minio
     command: server /data
@@ -47,7 +25,4 @@ services:
 
 volumes:
   pg-data:
-  mongo-data:
-  mongo-config:
-  redis-data:
   minio-data:
