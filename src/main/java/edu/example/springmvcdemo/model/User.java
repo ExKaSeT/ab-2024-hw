@@ -14,10 +14,10 @@ public class User {
     @Column(nullable = false, length = 30, name = "username")
     private String username;
 
-    @Column(nullable = false, name = "password")
+    @Column(nullable = false, length = 50, name = "password")
     private String password;
 
-    @Column(nullable = false, name = "role")
+    @Column(nullable = false, length = 50, name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -29,8 +29,8 @@ public class User {
     @EqualsAndHashCode.Exclude
     private List<RefreshToken> refreshTokens;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Message> messages;
+    private List<Image> images;
 }

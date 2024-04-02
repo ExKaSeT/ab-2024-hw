@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import java.util.List;
 
 @Entity
 @Table(name = "images")
@@ -14,24 +13,21 @@ public class Image {
      Object name in storage
      */
     @Id
-    @Column(name = "link", length = 50)
+    @Column(name = "link", length = 50, nullable = false)
     private String link;
 
     /**
      Original filename
      */
-    @Column(name = "name", length = 100)
-    private String name;
+    @Column(name = "original_name", length = 100, nullable = false)
+    private String originalName;
 
-    @Column(name = "size")
-    private Integer size;
+    @Column(name = "size_bytes", nullable = false)
+    private int sizeBytes;
 
-    @ManyToMany
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_username", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JoinTable(
-            name = "messages_images",
-            joinColumns = @JoinColumn(name = "image_link"),
-            inverseJoinColumns = @JoinColumn(name = "message_id"))
-    private List<Message> messages;
+    private User user;
 }
