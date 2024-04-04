@@ -12,12 +12,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  cache:
-    type: redis
-    cache-names: redis-cache
-    redis:
-      time-to-live: 30000
-
   messages:
     basename: i18n/messages
 
