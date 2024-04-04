@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -71,7 +72,7 @@ public class MinioRepository implements StorageRepository {
                     .bucket(bucketName)
                     .object(objectName).build());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DataAccessResourceFailureException(e.getMessage(), e);
         }
     }
 
@@ -83,11 +84,12 @@ public class MinioRepository implements StorageRepository {
                     .object(objectName)
                     .build());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DataAccessResourceFailureException(e.getMessage(), e);
         }
     }
 
-    public List<String> getObjectList() {
+    @Override
+    public List<String> getAllObjects() {
         var iterable = minioClient.listObjects(ListObjectsArgs.builder()
                 .bucket(bucketName).build());
 
