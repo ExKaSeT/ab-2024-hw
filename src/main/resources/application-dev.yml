@@ -35,4 +35,4 @@ minio:
 
 scheduler:
   enabled: true
-  deleteExpiredTokensCron: "*/15 * * * * *"
+  deleteExpiredTokensCron: "0 0 * * * ?"

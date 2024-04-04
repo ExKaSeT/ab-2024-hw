@@ -1,6 +1,8 @@
 package edu.example.springmvcdemo.security.jwt;
 
 import edu.example.springmvcdemo.dto.auth.AuthUserDto;
+import edu.example.springmvcdemo.dto.jwt.TokenPayloadDto;
+import edu.example.springmvcdemo.dto.jwt.TokensDto;
 import edu.example.springmvcdemo.model.User;
 import edu.example.springmvcdemo.security.exception.InvalidTokenException;
 import edu.example.springmvcdemo.service.RefreshTokenService;
@@ -10,8 +12,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -36,7 +36,7 @@ public class JwtService {
         this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(properties.getSecretKey()));
     }
 
-    public Tokens buildTokens(User user) {
+    public TokensDto buildTokens(User user) {
         Instant currentDate = Instant.now();
         Instant refreshTokenExpirationDate = currentDate.plus(properties.getRefreshTokenExpirationMin(), ChronoUnit.MINUTES);
         var token = tokenService.saveToken(user, refreshTokenExpirationDate);
@@ -55,38 +55,17 @@ public class JwtService {
                 .signWith(this.signingKey)
                 .compact();
 
-        return new Tokens(accessToken, refreshToken);
+        return new TokensDto(accessToken, refreshToken);
     }
 
-    @Data
-    @AllArgsConstructor
-    public static class Tokens {
-        private String accessToken;
-        private String refreshToken;
-    }
-
-    @Data
-    @AllArgsConstructor
-    public static class TokenPayload {
-        private String username;
-        /**
-         Null in access token
-         */
-        private Long tokenId;
-
-        public boolean isAccessToken() {
-            return tokenId == null;
-        }
-    }
-
-    public TokenPayload parseToken(String token) {
+    public TokenPayloadDto parseToken(String token) {
         try {
             Claims claims = Jwts.parser().verifyWith(this.signingKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
 
-            return new TokenPayload(claims.getSubject(),  claims.get("tokenId", Long.class));
+            return new TokenPayloadDto(claims.getSubject(),  claims.get("tokenId", Long.class));
         } catch (RuntimeException ex) {
             throw new InvalidTokenException("Invalid token");
         }
@@ -99,8 +78,8 @@ public class JwtService {
             throw new InvalidTokenException("Invalid token");
         }
 
-        var token = tokenService.getToken(payload.tokenId);
-        var user = userService.getUserByUsername(payload.username);
+        var token = tokenService.getToken(payload.getTokenId());
+        var user = userService.getUserByUsername(payload.getUsername());
         if (token.isWasUsed()) {
             tokenService.deactivateUserTokens(user.getUsername());
             throw new InvalidTokenException("Refresh token already was used");
@@ -109,14 +88,5 @@ public class JwtService {
 
         var tokens = this.buildTokens(user);
         return new AuthUserDto(tokens.getAccessToken(), tokens.getRefreshToken(), user.getUsername());
-    }
-
-    public void deactivateRefreshToken(String token) {
-        var payload = this.parseToken(token);
-        if (payload.isAccessToken()) {
-            throw new InvalidTokenException("Invalid token");
-        }
-        var tokenObj = tokenService.getToken(payload.tokenId);
-        tokenService.setUsed(tokenObj);
     }
 }

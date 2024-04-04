@@ -6,8 +6,8 @@ import edu.example.springmvcdemo.exception.EntityNotFoundException;
 import edu.example.springmvcdemo.model.Image;
 import edu.example.springmvcdemo.model.User;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.compress.utils.FileNameUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.util.List;
@@ -16,7 +16,7 @@ import static java.util.Objects.isNull;
 @Service
 @RequiredArgsConstructor
 public class ImageService {
-    private static int FILENAME_MAX_LENGTH = 100;
+    private static final int FILENAME_MAX_LENGTH = 100;
 
     private final ImageRepository imageRepository;
     private final StorageRepository storageRepository;
@@ -48,11 +48,11 @@ public class ImageService {
         }
         image.setSizeBytes((int) file.getSize());
 
-        // TODO
         String originalName = file.getOriginalFilename();
-        if (isNull(originalName) || originalName.length() > FILENAME_MAX_LENGTH) {
-            String extension = FileNameUtils.getExtension(file.getOriginalFilename());
-            originalName = "unknown" + extension;
+        if (isNull(originalName)) {
+            originalName = "unknown";
+        } else if (originalName.length() > FILENAME_MAX_LENGTH) {
+            originalName = originalName.substring(originalName.length() - FILENAME_MAX_LENGTH);
         }
         image.setOriginalName(originalName);
 
@@ -66,6 +66,7 @@ public class ImageService {
         }
     }
 
+    @Transactional
     public void delete(String link) {
         storageRepository.deleteObject(link);
         imageRepository.deleteByLink(link);

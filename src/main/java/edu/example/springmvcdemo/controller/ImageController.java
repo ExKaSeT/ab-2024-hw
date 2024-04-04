@@ -6,12 +6,14 @@ import edu.example.springmvcdemo.dto.image.UploadImageResponseDto;
 import edu.example.springmvcdemo.mapper.ImageMapper;
 import edu.example.springmvcdemo.security.UserDetailsImpl;
 import edu.example.springmvcdemo.service.ImageService;
+import edu.example.springmvcdemo.validation.constraints.ImageExtensionConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -47,7 +49,7 @@ public class ImageController {
             @ApiResponse(responseCode = "500", description = "Непредвиденная ошибка",
                     content = {@Content(schema = @Schema(implementation = SuccessContainerDto.class))})
     })
-    public UploadImageResponseDto uploadImage(@RequestPart(name = "file") MultipartFile file,
+    public UploadImageResponseDto uploadImage(@RequestPart(name = "file") @Valid @ImageExtensionConstraint MultipartFile file,
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return mapper.toUploadImageResponseDto(imageService.upload(file, userDetails.getUser()));
     }

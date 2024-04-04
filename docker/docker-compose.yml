@@ -12,7 +12,7 @@ services:
       - pg-data:/var/lib/postgresql/data
 
   minio:
-    image: quay.io/minio/minio
+    image: quay.io/minio/minio:RELEASE.2024-03-30T09-41-56Z
     command: server /data
     ports:
       - "9000:9000"
