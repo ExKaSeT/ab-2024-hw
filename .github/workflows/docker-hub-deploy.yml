@@ -21,4 +21,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ExKaSeT/image-editor:latest
+          tags: exkaset/image-editor:latest
