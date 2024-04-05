@@ -1,0 +1,57 @@
+name: Build-check-test
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Compile
+      run: mvn clean compile
+
+      
+  checkstyle:
+     runs-on: ubuntu-latest
+     steps:
+     - uses: actions/checkout@v3
+     - name: Set up JDK 17
+       uses: actions/setup-java@v3
+       with:
+         java-version: '17'
+         distribution: 'temurin'
+         cache: maven
+     - name: Checkstyle
+       run: mvn checkstyle:check
+
+
+  unit_tests:
+     needs: [build, checkstyle]
+     permissions:
+      pull-requests: write
+     runs-on: ubuntu-latest
+     steps:
+     - uses: actions/checkout@v3
+     - name: Set up JDK 17
+       uses: actions/setup-java@v3
+       with:
+         java-version: '17'
+         distribution: 'temurin'
+         cache: maven
+     - name: Test
+       run: mvn clean verify
+     - name: Add coverage to PR
+       uses: madrapps/jacoco-report@v1.6.1
+       with:
+        paths: ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
+        token: ${{ secrets.GITHUB_TOKEN }}
+        min-coverage-overall: 50
+       
