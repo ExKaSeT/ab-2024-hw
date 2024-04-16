@@ -32,7 +32,7 @@ import static java.util.Objects.isNull;
 
 @RestController
 @RequestMapping("/api/v1")
-@Tag(name = "Image Controller", description = "Загрузка нового изображения в систему")
+@Tag(name = "Image Controller", description = "Базовый CRUD API для работы с картинками")
 @RequiredArgsConstructor
 public class ImageController {
 
