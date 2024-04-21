@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2024-04-16-create-image-processing-table" author="admin">
+        <createTable tableName="image_processing">
+            <column name="request_id" type="VARCHAR(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="original_image" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="processed_image" type="VARCHAR(50)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+            <column name="status" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="image_processing"
+                                 baseColumnNames="original_image"
+                                 constraintName="fk_image_processing_original_image"
+                                 referencedTableName="images"
+                                 referencedColumnNames="link"/>
+
+        <createIndex tableName="image_processing" indexName="idx_image_processing_original_image">
+            <column name="original_image"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

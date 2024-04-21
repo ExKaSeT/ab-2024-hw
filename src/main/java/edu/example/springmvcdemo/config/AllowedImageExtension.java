@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 public enum AllowedImageExtension {
     PNG,
-    JPEG;
+    JPEG,
+    JPG;
 
     public static boolean isAllowedIgnoreCase(String extension) {
         return Arrays.stream(AllowedImageExtension.values())
