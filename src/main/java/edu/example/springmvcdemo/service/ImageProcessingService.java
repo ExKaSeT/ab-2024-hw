@@ -9,6 +9,7 @@ import edu.example.springmvcdemo.exception.EntityNotFoundException;
 import edu.example.springmvcdemo.model.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
@@ -23,6 +24,7 @@ import static java.util.Objects.isNull;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "spring.kafka.enable", havingValue = "true")
 public class ImageProcessingService {
 
     private final ImageService imageService;
@@ -75,7 +77,7 @@ public class ImageProcessingService {
                     ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG + "=1000"
             }
     )
-    public void consume(@Payload ImageDoneDto imageDoneDto, Acknowledgment acknowledgment) {
+    public void processDoneImages(@Payload ImageDoneDto imageDoneDto, Acknowledgment acknowledgment) {
         var imageProcessingOpt = imageProcessingRepository.findById(imageDoneDto.getRequestId());
         if (imageProcessingOpt.isEmpty()) {
             if (storageRepository.isObjectExist(imageDoneDto.getImageId())) {

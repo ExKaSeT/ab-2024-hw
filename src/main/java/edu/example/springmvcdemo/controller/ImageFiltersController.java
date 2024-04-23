@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +28,7 @@ import java.util.List;
 @Validated
 @Tag(name = "Image Filters Controller", description = "Базовый CRUD API для работы с пользовательскими запросами на редактирование картинок")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "spring.kafka.enable", havingValue = "true")
 public class ImageFiltersController {
 
     private final ImageProcessingService imageProcessingService;
