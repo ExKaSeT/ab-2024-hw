@@ -1,33 +1,27 @@
 package edu.example.springmvcdemo.controller;
 
-import edu.example.springmvcdemo.model.Message;
+import edu.example.springmvcdemo.dto.message.MessageDto;
 import edu.example.springmvcdemo.service.MessageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.stereotype.Controller;
-
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
-@Controller
+@RestController
+@RequestMapping("/message")
 @RequiredArgsConstructor
 public class MessageController {
 
     private final MessageService messageService;
 
-    @QueryMapping
-    public Message getMessageById(@Argument Long id) {
+    @GetMapping("/{id}")
+    public MessageDto getMessageById(@PathVariable Long id) {
         return messageService.getMessage(id);
     }
 
-    @QueryMapping
-    public List<Message> getMessages() {
-        return messageService.getAllMessages();
-    }
-
-    @MutationMapping
-    public Message sendMessage(@Argument String content) {
-        return messageService.createMessage(content);
+    @PostMapping
+    public MessageDto sendMessage(@RequestPart("message") String content,
+                               @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+        return messageService.createMessageWithFiles(content, files);
     }
 }
