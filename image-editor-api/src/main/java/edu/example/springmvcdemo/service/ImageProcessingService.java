@@ -74,7 +74,7 @@ public class ImageProcessingService {
                     ConsumerConfig.ISOLATION_LEVEL_CONFIG + "=read_committed",
                     ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG +
                             "=org.apache.kafka.clients.consumer.CooperativeStickyAssignor",
-                    ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG + "=1000"
+                    ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG + "=500"
             }
     )
     public void processDoneImages(@Payload ImageDoneDto imageDoneDto, Acknowledgment acknowledgment) {

@@ -19,6 +19,8 @@ spring:
   liquibase.change-log: classpath:/db/changelog/db-changelog.xml
 
   kafka:
+    enable: true
+
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:

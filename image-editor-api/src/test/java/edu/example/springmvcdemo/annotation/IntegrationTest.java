@@ -14,7 +14,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @ActiveProfiles({"test", "dev"})
-@SpringBootTest(value = "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration, org.springframework.cloud.zookeeper.ZookeeperAutoConfiguration")
+@SpringBootTest(value = {"spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration," +
+        " org.springframework.cloud.zookeeper.ZookeeperAutoConfiguration", "spring.kafka.enable=false"})
 @ContextConfiguration(initializers = {PostgreTestConfig.Initializer.class, MinioTestConfig.Initializer.class})
 public @interface IntegrationTest {
 }

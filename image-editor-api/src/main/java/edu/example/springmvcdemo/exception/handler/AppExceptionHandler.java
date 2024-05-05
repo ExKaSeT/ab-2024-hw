@@ -46,7 +46,7 @@ public class AppExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleException() {
+    public ResponseEntity<?> handleExceptions(Exception e) {
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new SuccessContainerDto(false, null));
     }
 }
