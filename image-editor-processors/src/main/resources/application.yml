@@ -1,0 +1,48 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  messages:
+    basename: i18n/messages
+
+  #liquibase
+  liquibase.change-log: classpath:/db/changelog/db-changelog.xml
+
+  kafka:
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring:
+          json:
+            add.type.headers: false
+
+    consumer:
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    admin:
+      properties:
+        min-in-sync-replicas: 2
+    listener.ack-mode: manual
+    bootstrap-servers:
+      - localhost:9092
+      - localhost:9093
+      - localhost:9094
+
+  cloud:
+    zookeeper:
+      config.enabled: false
+      connect-string: localhost:2181
+
+app:
+  group-id: ${GROUP_ID:api-group-id}

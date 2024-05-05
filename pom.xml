@@ -11,8 +11,13 @@
     <groupId>edu.example</groupId>
     <artifactId>hw</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <name>spring-mvc-demo</name>
     <description>spring-mvc-demo</description>
+    <modules>
+        <module>image-editor-api</module>
+        <module>image-editor-processors</module>
+    </modules>
     <properties>
         <java.version>17</java.version>
         <spring.boot.version>3.2.4</spring.boot.version>

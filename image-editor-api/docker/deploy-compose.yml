@@ -27,8 +27,8 @@ services:
   backend:
     image: backend:0.0.1
     build:
-      context: ../
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: ../Dockerfile
     ports:
       - "8080:8080"
     depends_on:
