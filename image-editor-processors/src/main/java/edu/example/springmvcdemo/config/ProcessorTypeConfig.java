@@ -21,6 +21,9 @@ public class ProcessorTypeConfig {
         return type.name() + "-processor";
     }
 
+    /**
+     * Схема в бд выставляется на основе названия обработчика, что позволяет использовать 1 базу для всех
+    * */
     @EventListener
     public void setSchema(ApplicationEnvironmentPreparedEvent event) {
         var type = ImageProcessingFilter.valueOf(event.getEnvironment().getProperty("processor.type"));

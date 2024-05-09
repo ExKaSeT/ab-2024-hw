@@ -3,15 +3,16 @@ package edu.example.springmvcdemo.dao;
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
 import io.minio.messages.Item;
+import io.minio.messages.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Repository
@@ -19,6 +20,8 @@ import java.util.UUID;
 public class MinioRepository implements StorageRepository {
 
     private static final int MAX_ATTEMPTS_TO_GEN_FILENAME = 3;
+    private static final int UPLOAD_STREAM_PART_SIZE_BYTES = 10_000_000;
+    private static final Tag TEMPORARY_OBJECT_TAG = new Tag("ttl", "temp");
 
     private final MinioClient minioClient;
 
@@ -26,14 +29,17 @@ public class MinioRepository implements StorageRepository {
     private String bucketName;
 
     @Value("${minio.ttl-days}")
-    private Integer ttlDays;
+    private int ttlDays;
 
-    public ObjectWriteResponse saveObject(String objectName, Long size, InputStream object) {
+    private ObjectWriteResponse saveObject(String objectName, InputStream object, boolean isTemporary) {
         try {
             return minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
-                    .stream(object, size, -1).build());
+                    .tags(isTemporary ?
+                            Map.of(TEMPORARY_OBJECT_TAG.key(), TEMPORARY_OBJECT_TAG.value()) :
+                            null)
+                    .stream(object, -1, UPLOAD_STREAM_PART_SIZE_BYTES).build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -91,7 +97,7 @@ public class MinioRepository implements StorageRepository {
     }
 
     @Override
-    public String save(MultipartFile file) {
+    public String save(InputStream object, boolean isTemporary) {
 
         String generatedFileName = UUID.randomUUID().toString();
 
@@ -103,11 +109,7 @@ public class MinioRepository implements StorageRepository {
             generatedFileName = UUID.randomUUID().toString();
         }
 
-        try {
-            this.saveObject(generatedFileName, file.getSize(), file.getInputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.saveObject(generatedFileName, object, isTemporary);
 
         return generatedFileName;
     }

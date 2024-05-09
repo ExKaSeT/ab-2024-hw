@@ -19,6 +19,10 @@ spring:
   liquibase.change-log: classpath:/db/changelog/db-changelog.xml
 
   kafka:
+    topic-name:
+      images-wip: images.wip
+      images-done: images.done
+
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
@@ -46,3 +50,6 @@ spring:
 
 app:
   group-id: ${GROUP_ID:api-group-id}
+
+minio:
+  ttl-days: 3

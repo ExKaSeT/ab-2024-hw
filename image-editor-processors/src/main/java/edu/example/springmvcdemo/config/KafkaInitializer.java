@@ -1,8 +1,10 @@
 package edu.example.springmvcdemo.config;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.RoundRobinPartitioner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +21,12 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "spring.kafka.enable", havingValue = "true")
 public class KafkaInitializer {
-    public static final String IMAGES_WIP_TOPIC_NAME = "images.wip";
-    public static final String IMAGES_DONE_TOPIC_NAME = "images.done";
+    @Getter
+    @Value("${kafka.topic-name.images-wip}")
+    private String imagesWipTopicName;
+    @Getter
+    @Value("${kafka.topic-name.images-done}")
+    private String imagesDoneTopicName;
 
     private final KafkaProperties properties;
 
