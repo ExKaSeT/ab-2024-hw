@@ -1,12 +1,12 @@
 package edu.example.springmvcdemo.service;
 
-import edu.example.springmvcdemo.dao.ImageProcessingRepository;
+import edu.example.springmvcdemo.config.AllowedImageExtension;
 import edu.example.springmvcdemo.dto.image_processing.ImageDoneDto;
 import edu.example.springmvcdemo.dto.image_processing.ImageWipDto;
-import edu.example.springmvcdemo.model.ImageProcessing;
 import edu.example.springmvcdemo.model.ImageProcessingFilter;
 import edu.example.springmvcdemo.model.ImageProcessingStatus;
 import lombok.RequiredArgsConstructor;
+import org.apache.curator.shaded.com.google.common.io.Files;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -23,8 +23,6 @@ import static edu.example.springmvcdemo.config.KafkaConfig.IMAGES_WIP_TOPIC_NAME
 @ConditionalOnProperty(name = "spring.kafka.enable", havingValue = "true")
 public class ImageProcessingKafkaService {
 
-    private final ImageService imageService;
-    private final ImageProcessingRepository imageProcessingRepository;
     private final KafkaTemplate<Object, Object> allAcksKafkaTemplate;
     private final ImageProcessingService imageProcessingService;
 
@@ -34,18 +32,22 @@ public class ImageProcessingKafkaService {
     * */
     @Transactional
     public String createApplyFiltersRequest(String imageId, List<ImageProcessingFilter> filters) {
-        var imageDb = new ImageProcessing();
-        imageDb.setOriginalImage(imageService.getMeta(imageId));
         var requestId = UUID.randomUUID().toString();
-        imageDb.setRequestId(requestId);
-        imageDb.setStatus(ImageProcessingStatus.WIP);
-        imageProcessingRepository.save(imageDb);
+        var processingRecord = imageProcessingService.createImageProcessingRecord(requestId, imageId, ImageProcessingStatus.WIP);
 
-        var imageKafka = new ImageWipDto();
-        imageKafka.setImageId(imageId);
-        imageKafka.setRequestId(requestId);
-        imageKafka.setFilters(filters);
-        allAcksKafkaTemplate.send(IMAGES_WIP_TOPIC_NAME, imageKafka);
+        var extensionString = Files.getFileExtension(processingRecord.getOriginalImage().getOriginalName());
+        AllowedImageExtension extension;
+        try {
+            extension = AllowedImageExtension.valueOf(extensionString.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalStateException("Image extension not allowed");
+        }
+        var imageWip = new ImageWipDto();
+        imageWip.setImageId(imageId);
+        imageWip.setRequestId(requestId);
+        imageWip.setFilters(filters);
+        imageWip.setExtension(extension);
+        allAcksKafkaTemplate.send(IMAGES_WIP_TOPIC_NAME, imageWip);
         return requestId;
     }
 

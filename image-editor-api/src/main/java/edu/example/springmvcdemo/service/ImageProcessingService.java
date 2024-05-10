@@ -60,4 +60,13 @@ public class ImageProcessingService {
         imageService.saveMeta(processed.getProcessedImage(), original.getOriginalName(),
                 imageDoneDto.getSizeBytes(), original.getUser());
     }
+
+    public ImageProcessing createImageProcessingRecord(String requestId, String originalImageId,
+                                                       ImageProcessingStatus status) {
+        var imageProcessing = new ImageProcessing();
+        imageProcessing.setOriginalImage(imageService.getMeta(originalImageId));
+        imageProcessing.setRequestId(requestId);
+        imageProcessing.setStatus(status);
+        return imageProcessingRepository.save(imageProcessing);
+    }
 }
