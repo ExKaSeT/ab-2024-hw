@@ -57,11 +57,7 @@ public class ImageProcessingServiceTest {
         var image = imageService.upload(file, user);
         var imageMeta = imageService.getMeta(image.getLink());
         var requestId = UUID.randomUUID().toString();
-        var imageProcessing = new ImageProcessing();
-        imageProcessing.setOriginalImage(imageMeta);
-        imageProcessing.setRequestId(requestId);
-        imageProcessing.setStatus(status);
-        return imageProcessingRepository.save(imageProcessing);
+        return imageProcessingService.createImageProcessingRecord(requestId, imageMeta.getLink(), status);
     }
 
     @Test
