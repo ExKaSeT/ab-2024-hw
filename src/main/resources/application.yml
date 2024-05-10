@@ -22,14 +22,12 @@ spring:
     enable: true
 
     producer:
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring:
           json:
             add.type.headers: false
 
     consumer:
-      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
       properties:
         spring.json.trusted.packages: "*"
     admin:

@@ -6,6 +6,7 @@ import edu.example.springmvcdemo.dto.image.ApplyImageFiltersResponseDto;
 import edu.example.springmvcdemo.dto.image.GetModifiedImageByRequestIdResponseDto;
 import edu.example.springmvcdemo.exception.EntityNotFoundException;
 import edu.example.springmvcdemo.model.ImageProcessingFilter;
+import edu.example.springmvcdemo.service.ImageProcessingKafkaService;
 import edu.example.springmvcdemo.service.ImageProcessingService;
 import edu.example.springmvcdemo.validation.constraints.ImageFilterConstraint;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,7 @@ import java.util.List;
 public class ImageFiltersController {
 
     private final ImageProcessingService imageProcessingService;
+    private final ImageProcessingKafkaService imageProcessingKafkaService;
     private final ImageProcessingRepository imageProcessingRepository;
 
     @PostMapping("/{image-id}/filters/apply")
@@ -47,7 +49,7 @@ public class ImageFiltersController {
     })
     public ApplyImageFiltersResponseDto applyImageFilters(@PathVariable("image-id") String imageId,
                                                           @Valid @RequestParam List<@ImageFilterConstraint String> filters) {
-        var requestId = imageProcessingService.createApplyFiltersRequest(imageId,
+        var requestId = imageProcessingKafkaService.createApplyFiltersRequest(imageId,
                 filters.stream().map(ImageProcessingFilter::valueOf).toList());
         return new ApplyImageFiltersResponseDto(requestId);
     }
