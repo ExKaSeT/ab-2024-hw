@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class ImageDoneDto {
     private String imageId;
     private String requestId;
+    private int sizeBytes;
 }
