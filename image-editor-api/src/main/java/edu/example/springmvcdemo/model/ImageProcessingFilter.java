@@ -1,6 +1,9 @@
 package edu.example.springmvcdemo.model;
 
 public enum ImageProcessingFilter {
-    REVERSE_COLORS,
-    CROP
+    TO_RED,
+    TO_GREEN,
+    TO_BLUE,
+    ROTATE_90_CLOCKWISE,
+    BORDER_SELECTION
 }

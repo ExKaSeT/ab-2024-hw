@@ -1,12 +1,15 @@
 package edu.example.springmvcdemo.processor;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import static java.lang.Math.sqrt;
 
 public class RobertsCrossEdgeDetector implements ImageProcessor {
@@ -16,8 +19,8 @@ public class RobertsCrossEdgeDetector implements ImageProcessor {
     }
 
     @Override
-    public InputStream process(InputStream stream) throws IOException {
-        BufferedImage image = ImageIO.read(stream);
+    public InputStream process(InputStream imageStream, String imageExtension) throws IOException {
+        BufferedImage image = ImageIO.read(imageStream);
         int width = image.getWidth();
         int height = image.getHeight();
 
@@ -35,6 +38,7 @@ public class RobertsCrossEdgeDetector implements ImageProcessor {
         }
 
         var outputStream = new ByteArrayOutputStream();
-        ImageIO.write(image, "PNG", outputStream);
+        ImageIO.write(image, imageExtension, outputStream);
+        return new ByteArrayInputStream(outputStream.toByteArray());
     }
 }

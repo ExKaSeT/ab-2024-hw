@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public interface ImageProcessor {
-    InputStream process(InputStream stream) throws IOException;
+    InputStream process(InputStream imageStream, String imageExtension) throws IOException;
 }
