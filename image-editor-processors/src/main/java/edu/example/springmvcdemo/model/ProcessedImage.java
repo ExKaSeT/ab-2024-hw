@@ -15,7 +15,8 @@ public class ProcessedImage {
     /**
      * После сохранения обработанного изображения нет гарантий, что событие об этом отправилось,
      * поэтому сохраняю и обработанное изображение
+     * NULL - обработка завершена с ошибкой
      * */
-    @Column(name = "processed_image_id", nullable = false)
+    @Column(name = "processed_image_id")
     private String processedImageId;
 }
