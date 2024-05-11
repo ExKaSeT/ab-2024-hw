@@ -1,6 +1,5 @@
 package edu.example.springmvcdemo.config;
 
-import edu.example.springmvcdemo.exception.kafka.KafkaErrorHandler;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -13,11 +12,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
-import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.converter.ByteArrayJsonMessageConverter;
 import org.springframework.kafka.support.converter.RecordMessageConverter;
+import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration
 @RequiredArgsConstructor
@@ -25,6 +25,9 @@ import org.springframework.kafka.support.converter.RecordMessageConverter;
 public class KafkaConfig {
     public static final String IMAGES_WIP_TOPIC_NAME = "images.wip";
     public static final String IMAGES_DONE_TOPIC_NAME = "images.done";
+    // retries count on not fatal errors
+    private static final int CONSUMER_RETRIES_COUNT = 3;
+    private static final long CONSUMER_RETRIES_INTERVAL_MS = 100L;
 
     private final KafkaProperties properties;
 
@@ -45,21 +48,15 @@ public class KafkaConfig {
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Object, Object>> kafkaListenerContainerFactory(
-            CommonErrorHandler commonErrorHandler,
             RecordMessageConverter converter
     ) {
         var factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
-        factory.setCommonErrorHandler(commonErrorHandler);
+        factory.setCommonErrorHandler(new DefaultErrorHandler(new FixedBackOff(CONSUMER_RETRIES_INTERVAL_MS, CONSUMER_RETRIES_COUNT)));
         factory.setConcurrency(2);
         factory.setRecordMessageConverter(converter);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;
-    }
-
-    @Bean
-    public CommonErrorHandler commonErrorHandler() {
-        return new KafkaErrorHandler();
     }
 
     @Bean
