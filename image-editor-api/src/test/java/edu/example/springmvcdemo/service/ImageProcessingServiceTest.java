@@ -86,32 +86,16 @@ public class ImageProcessingServiceTest {
 
     @Test
     @Transactional
-    public void doneImageDeletingIfRequestNotExist() {
+    public void doneImageIgnoreIfRequestNotExist() {
         var imageProcessing = createProcessingRecord(ImageProcessingStatus.DONE);
         var requestId = imageProcessing.getRequestId();
         var image = imageProcessing.getOriginalImage();
         imageProcessingRepository.delete(imageProcessing);
 
-        imageProcessingService.processDoneImage(new ImageDoneDto(image.getLink(), requestId, 666));
+        imageProcessingService.processDoneImage(new ImageDoneDto(image.getLink(), requestId, 666, ImageProcessingStatus.DONE));
 
-        assertFalse(storageRepository.isObjectExist(image.getLink()));
-    }
-
-    @Test
-    @Transactional
-    public void doneImageDeletingIfRequestAlreadyProcessed() {
-        var imageProcessing = createProcessingRecord(ImageProcessingStatus.WIP);
-        var original = imageProcessing.getOriginalImage();
-        var requestId = imageProcessing.getRequestId();
-        var user = userRepository.findByUsername(USERNAME).get();
-        var processedImage = imageService.upload(createFile(), user);
-        imageProcessing.setProcessedImage(UUID.randomUUID().toString());
-        imageProcessingRepository.save(imageProcessing);
-
-        imageProcessingService.processDoneImage(new ImageDoneDto(processedImage.getLink(), requestId, 666));
-
-        assertFalse(storageRepository.isObjectExist(processedImage.getLink()));
-        assertTrue(storageRepository.isObjectExist(original.getLink()));
+        assertEquals(0, imageProcessingRepository.findAll().size());
+        assertEquals(1, imageRepository.findAll().size());
     }
 
     @Test
@@ -123,7 +107,8 @@ public class ImageProcessingServiceTest {
         var user = userRepository.findByUsername(USERNAME).get();
         var processedImage = imageService.upload(createFile(), user);
 
-        imageProcessingService.processDoneImage(new ImageDoneDto(processedImage.getLink(), requestId, 666));
+        imageProcessingService.processDoneImage(new ImageDoneDto(
+                processedImage.getLink(), requestId, 666, ImageProcessingStatus.DONE));
         imageProcessing = imageProcessingRepository.findById(requestId).get();
         var meta = imageService.getMeta(imageProcessing.getProcessedImage());
 

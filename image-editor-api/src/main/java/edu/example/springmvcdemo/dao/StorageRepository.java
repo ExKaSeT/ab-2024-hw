@@ -14,4 +14,6 @@ public interface StorageRepository {
     boolean isObjectExist(String objectName);
 
     List<String> getAllObjects();
+
+    void removeObjectTags(String objectName);
 }

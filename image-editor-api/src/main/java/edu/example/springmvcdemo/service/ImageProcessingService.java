@@ -9,7 +9,6 @@ import edu.example.springmvcdemo.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Objects;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -37,28 +36,34 @@ public class ImageProcessingService {
     public void processDoneImage(ImageDoneDto imageDoneDto) {
         var imageProcessingOpt = imageProcessingRepository.findById(imageDoneDto.getRequestId());
         var processedImageId = imageDoneDto.getImageId();
+
+        // checks request existence
         if (imageProcessingOpt.isEmpty()) {
-            if (storageRepository.isObjectExist(processedImageId)) {
-                storageRepository.deleteObject(processedImageId);
-            }
             return;
         }
 
+        // checks already processed
         var imageProcessing = imageProcessingOpt.get();
-        if (nonNull(imageProcessing.getProcessedImage())) {
-            if (!Objects.equals(processedImageId, imageProcessing.getProcessedImage()) &&
-                    storageRepository.isObjectExist(processedImageId)) {
-                storageRepository.deleteObject(processedImageId);
-            }
+        if (nonNull(imageProcessing.getProcessedImage()) ||
+                imageProcessing.getStatus().equals(ImageProcessingStatus.FAILED)) {
             return;
         }
 
+        var newStatus = imageDoneDto.getStatus();
         imageProcessing.setProcessedImage(processedImageId);
-        imageProcessing.setStatus(ImageProcessingStatus.DONE);
+        imageProcessing.setStatus(newStatus);
         var processed = imageProcessingRepository.save(imageProcessing);
+
+        // checks failed
+        if (newStatus.equals(ImageProcessingStatus.FAILED)) {
+            return;
+        }
+
         var original = processed.getOriginalImage();
-        imageService.saveMeta(processed.getProcessedImage(), original.getOriginalName(),
+        imageService.saveMeta(processedImageId, original.getOriginalName(),
                 imageDoneDto.getSizeBytes(), original.getUser());
+        // remove tags to make object non-temporary
+        storageRepository.removeObjectTags(processedImageId);
     }
 
     public ImageProcessing createImageProcessingRecord(String requestId, String originalImageId,

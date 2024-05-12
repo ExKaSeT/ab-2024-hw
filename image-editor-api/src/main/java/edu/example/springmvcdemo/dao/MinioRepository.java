@@ -1,7 +1,7 @@
 package edu.example.springmvcdemo.dao;
 
 import io.minio.*;
-import io.minio.errors.ErrorResponseException;
+import io.minio.errors.*;
 import io.minio.messages.Item;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -100,6 +100,18 @@ public class MinioRepository implements StorageRepository {
             } catch (Exception ignored) {}
         }
         return objectNameList;
+    }
+
+    @Override
+    public void removeObjectTags(String objectName) {
+        try {
+            minioClient.deleteObjectTags(DeleteObjectTagsArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .build());
+        } catch (Exception e) {
+            throw new DataAccessResourceFailureException(e.getMessage(), e);
+        }
     }
 
     @Override
