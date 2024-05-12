@@ -22,6 +22,6 @@ minio:
   bucket-name: data
 
 processor.type: BORDER_SELECTION
-spring.datasource.schema: BORDER_SELECTION
-spring.liquibase.liquibaseSchema: BORDER_SELECTION
-spring.liquibase.defaultSchema: BORDER_SELECTION
+#spring.datasource.schema: BORDER_SELECTION
+#spring.liquibase.liquibaseSchema: BORDER_SELECTION
+#spring.liquibase.defaultSchema: BORDER_SELECTION

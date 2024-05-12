@@ -9,13 +9,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 @Component
-public class ExecutorServiceAsyncProcessor implements AsyncImageProcessor {
+public class FixedThreadPoolAsyncProcessor implements AsyncImageProcessor {
     private final ImageProcessor processor;
     private final ExecutorService executorService;
     private final int optimalThreadCount = Runtime.getRuntime().availableProcessors();
     private final StorageRepository storageRepository;
 
-    public ExecutorServiceAsyncProcessor(ImageProcessor processor, StorageRepository storageRepository) {
+    public FixedThreadPoolAsyncProcessor(ImageProcessor processor, StorageRepository storageRepository) {
         this.processor = processor;
         this.storageRepository = storageRepository;
         this.executorService = Executors.newFixedThreadPool(optimalThreadCount);
