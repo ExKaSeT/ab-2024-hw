@@ -1,7 +1,6 @@
 package edu.example.springmvcdemo.config;
 
 import edu.example.springmvcdemo.processor_async.AsyncImageProcessor;
-import edu.example.springmvcdemo.exception.kafka.KafkaErrorHandler;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -16,9 +15,11 @@ import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.converter.BatchMessagingMessageConverter;
 import org.springframework.kafka.support.converter.ByteArrayJsonMessageConverter;
 import org.springframework.kafka.support.converter.RecordMessageConverter;
-
+import org.springframework.util.backoff.ExponentialBackOff;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -36,27 +37,35 @@ public class KafkaConfig {
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Object, Object>> kafkaListenerContainerFactory(
-            CommonErrorHandler commonErrorHandler,
             RecordMessageConverter converter,
             AsyncImageProcessor imageProcessor,
-            ProcessorTypeConfig processorTypeConfig
+            ProcessorTypeConfig processorTypeConfig,
+            CommonErrorHandler errorHandler
     ) {
         var factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory(props -> props.putAll(Map.of(
                 ConsumerConfig.MAX_POLL_RECORDS_CONFIG, imageProcessor.simultaneousTasksOptimalCount(),
                 ConsumerConfig.GROUP_ID_CONFIG, processorTypeConfig.getProcessorName()
         ))));
-        factory.setCommonErrorHandler(commonErrorHandler);
+        factory.setCommonErrorHandler(errorHandler);
         factory.setConcurrency(1);
         factory.setRecordMessageConverter(converter);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.setBatchMessageConverter(new BatchMessagingMessageConverter(converter));
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.BATCH);
         factory.setBatchListener(true);
         return factory;
     }
 
     @Bean
-    public CommonErrorHandler commonErrorHandler() {
-        return new KafkaErrorHandler();
+    public DefaultErrorHandler handler() {
+        /*
+        * Infinitive retrying for guaranteed sending FAILED event to kafka
+        * */
+        ExponentialBackOff bo = new ExponentialBackOff();
+        bo.setInitialInterval(200L);
+        bo.setMultiplier(2.0);
+        bo.setMaxInterval(5_000L);
+        return new DefaultErrorHandler(bo);
     }
 
     @Bean
@@ -78,7 +87,6 @@ public class KafkaConfig {
     private ConsumerFactory<Object, Object> consumerFactory(Consumer<Map<String, Object>> enchanter) {
         var props = properties.buildProducerProperties(null);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, "org.apache.kafka.clients.consumer.CooperativeStickyAssignor");
         props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, "500");

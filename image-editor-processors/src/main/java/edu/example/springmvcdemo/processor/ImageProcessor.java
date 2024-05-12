@@ -1,8 +1,8 @@
 package edu.example.springmvcdemo.processor;
 
-import java.io.IOException;
-import java.io.InputStream;
+import edu.example.springmvcdemo.dto.processor.StreamDataDto;
+import java.io.*;
 
 public interface ImageProcessor {
-    InputStream process(InputStream imageStream, String imageExtension) throws IOException;
+    StreamDataDto process(InputStream imageStream, String imageExtension) throws IOException;
 }

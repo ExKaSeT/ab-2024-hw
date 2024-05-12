@@ -1,12 +1,10 @@
 package edu.example.springmvcdemo.processor;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
+import edu.example.springmvcdemo.dto.processor.StreamDataDto;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,13 +17,15 @@ public class RobertsCrossEdgeDetector implements ImageProcessor {
     }
 
     @Override
-    public InputStream process(InputStream imageStream, String imageExtension) throws IOException {
+    public StreamDataDto process(InputStream imageStream, String imageExtension) throws IOException {
         BufferedImage image = ImageIO.read(imageStream);
         int width = image.getWidth();
         int height = image.getHeight();
 
-        for (int w = 0; w < width - 1; w++) {
-            for (int h = 0; h < height - 1; h++) {
+        int lastWidthIdx = width - 1;
+        int lastHeightIdx = height - 1;
+        for (int w = 0; w < lastWidthIdx; w++) {
+            for (int h = 0; h < lastHeightIdx; h++) {
                 double Gx = calculateBrightness(new Color(image.getRGB(w + 1, h + 1))) -
                         calculateBrightness(new Color(image.getRGB(w, h)));
                 double Gy = calculateBrightness(new Color(image.getRGB(w + 1, h))) -
@@ -37,8 +37,15 @@ public class RobertsCrossEdgeDetector implements ImageProcessor {
             }
         }
 
+        for (int w = 0; w < width; w++) {
+            image.setRGB(w, lastHeightIdx, 0);
+        }
+        for (int h = 0; h < height; h++) {
+            image.setRGB(lastWidthIdx, h, 0);
+        }
+
         var outputStream = new ByteArrayOutputStream();
         ImageIO.write(image, imageExtension, outputStream);
-        return new ByteArrayInputStream(outputStream.toByteArray());
+        return new StreamDataDto(outputStream);
     }
 }

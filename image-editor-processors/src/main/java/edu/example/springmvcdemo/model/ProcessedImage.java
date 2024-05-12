@@ -19,4 +19,7 @@ public class ProcessedImage {
      * */
     @Column(name = "processed_image_id")
     private String processedImageId;
+
+    @Column(name = "processed_image_size_bytes")
+    private Integer sizeBytes;
 }

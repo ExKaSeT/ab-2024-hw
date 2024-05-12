@@ -1,11 +1,11 @@
 package edu.example.springmvcdemo.processor;
 
+import edu.example.springmvcdemo.dto.processor.StreamDataDto;
 import lombok.RequiredArgsConstructor;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ public class RgbFilter implements ImageProcessor {
     private final ColorFilter colorFilter;
 
     @Override
-    public InputStream process(InputStream imageStream, String imageExtension) throws IOException {
+    public StreamDataDto process(InputStream imageStream, String imageExtension) throws IOException {
         BufferedImage image = ImageIO.read(imageStream);
         int width = image.getWidth();
         int height = image.getHeight();
@@ -37,7 +37,7 @@ public class RgbFilter implements ImageProcessor {
 
         var outputStream = new ByteArrayOutputStream();
         ImageIO.write(image, imageExtension, outputStream);
-        return new ByteArrayInputStream(outputStream.toByteArray());
+        return new StreamDataDto(outputStream);
     }
 
     public enum ColorFilter {

@@ -12,5 +12,5 @@ public interface StorageRepository {
 
     List<String> getAllObjects();
 
-    String save(InputStream object, boolean isTemporary);
+    String save(InputStream object, long sizeBytes);
 }

@@ -1,9 +1,9 @@
 package edu.example.springmvcdemo.processor;
 
+import edu.example.springmvcdemo.dto.processor.StreamDataDto;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,7 @@ import java.io.InputStream;
 public class Rotate90Clockwise implements ImageProcessor {
 
     @Override
-    public InputStream process(InputStream imageStream, String imageExtension) throws IOException {
+    public StreamDataDto process(InputStream imageStream, String imageExtension) throws IOException {
         BufferedImage image = ImageIO.read(imageStream);
         int width = image.getWidth();
         int height = image.getHeight();
@@ -24,6 +24,6 @@ public class Rotate90Clockwise implements ImageProcessor {
 
         var outputStream = new ByteArrayOutputStream();
         ImageIO.write(result, imageExtension, outputStream);
-        return new ByteArrayInputStream(outputStream.toByteArray());
+        return new StreamDataDto(outputStream);
     }
 }

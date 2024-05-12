@@ -2,25 +2,28 @@ package edu.example.springmvcdemo.dao;
 
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
-import io.minio.messages.Item;
-import io.minio.messages.Tag;
+import io.minio.messages.*;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Repository;
 
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+
 
 @Repository
 @RequiredArgsConstructor
 public class MinioRepository implements StorageRepository {
 
     private static final int MAX_ATTEMPTS_TO_GEN_FILENAME = 3;
-    private static final int UPLOAD_STREAM_PART_SIZE_BYTES = 10_000_000;
     private static final Tag TEMPORARY_OBJECT_TAG = new Tag("ttl", "temp");
 
     private final MinioClient minioClient;
@@ -31,15 +34,51 @@ public class MinioRepository implements StorageRepository {
     @Value("${minio.ttl-days}")
     private int ttlDays;
 
-    private ObjectWriteResponse saveObject(String objectName, InputStream object, boolean isTemporary) {
+    @PostConstruct
+    public void setupStorage() {
+        createBucket();
+        addTTLRule();
+    }
+
+    @SneakyThrows
+    public void createBucket() {
+        boolean bucketExists = minioClient.bucketExists(BucketExistsArgs.builder()
+                .bucket(bucketName)
+                .build());
+
+        if (!bucketExists) {
+            minioClient.makeBucket(MakeBucketArgs.builder()
+                    .bucket(bucketName).build());
+        }
+    }
+
+    @SneakyThrows
+    public void addTTLRule() {
+        List<LifecycleRule> rules = new LinkedList<>();
+        rules.add(new LifecycleRule(
+                Status.ENABLED,
+                null,
+                new Expiration((ZonedDateTime) null, ttlDays, null),
+                new RuleFilter(TEMPORARY_OBJECT_TAG),
+                "TTL-Rule",
+                null,
+                null,
+                null
+        ));
+        LifecycleConfiguration config = new LifecycleConfiguration(rules);
+        minioClient.setBucketLifecycle(
+                SetBucketLifecycleArgs.builder()
+                        .bucket(bucketName)
+                        .config(config).build());
+    }
+
+    private ObjectWriteResponse saveObject(String objectName, InputStream object, long sizeBytes) {
         try {
             return minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
-                    .tags(isTemporary ?
-                            Map.of(TEMPORARY_OBJECT_TAG.key(), TEMPORARY_OBJECT_TAG.value()) :
-                            null)
-                    .stream(object, -1, UPLOAD_STREAM_PART_SIZE_BYTES).build());
+                    .tags(Map.of(TEMPORARY_OBJECT_TAG.key(), TEMPORARY_OBJECT_TAG.value()))
+                    .stream(object, sizeBytes, -1).build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -97,7 +136,7 @@ public class MinioRepository implements StorageRepository {
     }
 
     @Override
-    public String save(InputStream object, boolean isTemporary) {
+    public String save(InputStream object, long sizeBytes) {
 
         String generatedFileName = UUID.randomUUID().toString();
 
@@ -109,7 +148,7 @@ public class MinioRepository implements StorageRepository {
             generatedFileName = UUID.randomUUID().toString();
         }
 
-        this.saveObject(generatedFileName, object, isTemporary);
+        this.saveObject(generatedFileName, object, sizeBytes);
 
         return generatedFileName;
     }

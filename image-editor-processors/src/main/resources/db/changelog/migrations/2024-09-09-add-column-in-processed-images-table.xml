@@ -9,5 +9,9 @@
             <column name="processed_image_id" type="VARCHAR(50)">
             </column>
         </addColumn>
+        <addColumn tableName="processed_images">
+            <column name="processed_image_size_bytes" type="INT">
+            </column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>
