@@ -2,9 +2,11 @@ package edu.example.springmvcdemo.config;
 
 import edu.example.springmvcdemo.processor_async.AsyncImageProcessor;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.RoundRobinPartitioner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -28,11 +30,26 @@ import java.util.function.Consumer;
 @ConditionalOnProperty(name = "spring.kafka.enable", havingValue = "true")
 public class KafkaConfig {
 
+    @Value("${spring.kafka.topic-name.images-done}")
+    private String imagesDoneTopicName;
+    @Value("${spring.kafka.topic-name.images-wip}")
+    private String imagesWipTopicName;
+
     private final KafkaProperties properties;
 
     @Bean
     public KafkaTemplate<Object, Object> allAcksKafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean
+    public NewTopic imagesWipTopic() {
+        return new NewTopic(imagesWipTopicName, 3, (short) 2);
+    }
+
+    @Bean
+    public NewTopic imagesDoneTopic() {
+        return new NewTopic(imagesDoneTopicName, 2, (short) 2);
     }
 
     @Bean

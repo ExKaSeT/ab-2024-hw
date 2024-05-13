@@ -1,4 +1,5 @@
 version: "3.9"
+name: dev-env-for-api
 services:
   postgres:
     image: postgres:15.5

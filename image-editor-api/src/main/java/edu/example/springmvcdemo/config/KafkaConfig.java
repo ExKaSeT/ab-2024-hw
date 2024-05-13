@@ -33,12 +33,12 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic imagesWipTopic() {
-        return new NewTopic(IMAGES_WIP_TOPIC_NAME, 3, (short) 3);
+        return new NewTopic(IMAGES_WIP_TOPIC_NAME, 3, (short) 2);
     }
 
     @Bean
     public NewTopic imagesDoneTopic() {
-        return new NewTopic(IMAGES_DONE_TOPIC_NAME, 2, (short) 3);
+        return new NewTopic(IMAGES_DONE_TOPIC_NAME, 2, (short) 2);
     }
 
     @Bean
