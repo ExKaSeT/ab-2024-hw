@@ -1,20 +1,20 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: postgres
 
-  jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
-  #jpa
   jpa:
-    show-sql: true
-    properties.hibernate.format_sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  messages:
+    basename: i18n/messages
 
   #liquibase
   liquibase.change-log: classpath:/db/changelog/db-changelog.xml
 
-  graphql:
-    graphiql:
-      enabled: true

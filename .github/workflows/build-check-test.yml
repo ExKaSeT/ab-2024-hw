@@ -2,6 +2,7 @@ name: Build-check-test
 
 on:
   workflow_dispatch:
+  pull_request:
 
 jobs:
   build:
@@ -48,6 +49,7 @@ jobs:
      - name: Test
        run: mvn clean verify
      - name: Add coverage to PR
+       if: ( github.event_name == 'pull_request' )
        uses: madrapps/jacoco-report@v1.6.1
        with:
         paths: ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
