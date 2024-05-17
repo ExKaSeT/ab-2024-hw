@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  messages:
+    basename: i18n/messages
+
+minio:
+  datasource:
+    username: minioadmin
+    password: minioadmin
+    url: http://127.0.0.1:9000
+  bucket-name: data
+
+processor.type: BORDER_SELECTION
+#spring.datasource.schema: BORDER_SELECTION
+#spring.liquibase.liquibaseSchema: BORDER_SELECTION
+#spring.liquibase.defaultSchema: BORDER_SELECTION
