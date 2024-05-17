@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -20,8 +21,10 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import static java.util.Objects.isNull;
 
 @Slf4j
@@ -51,7 +54,8 @@ public class ImageProcessingKafkaService {
     @KafkaListener(
             topics = "${spring.kafka.topic-name.images-wip}"
     )
-    public void processImages(List<ImageWipDto> imageWipDto, @Header(KafkaHeaders.CONVERSION_FAILURES) List<ConversionException> exceptions) {
+    public void processImages(List<ImageWipDto> imageWipDto,
+                              @Header(KafkaHeaders.CONVERSION_FAILURES) List<ConversionException> exceptions) {
         Map<Integer, Future<StreamDataDto>> tasks = new HashMap<>();
         Map<Integer, ProcessedImage> eventsToSend = new HashMap<>();
         for (int index = 0; index < imageWipDto.size(); index++) {
@@ -101,30 +105,37 @@ public class ImageProcessingKafkaService {
             eventsToSend.put(imageDtoIndex, processed);
         }
 
-        for (var entry : eventsToSend.entrySet()) {
-            var imageDto = imageWipDto.get(entry.getKey());
-            var processed = entry.getValue();
+        try {
+            for (var entry : eventsToSend.entrySet()) {
+                var imageDto = imageWipDto.get(entry.getKey());
+                var processed = entry.getValue();
 
-            // failed processing
-            if (isNull(processed.getProcessedImageId())) {
-                allAcksKafkaTemplate.send(imagesDoneTopicName,
-                        new ImageDoneDto(null, processed.getId().getRequestId(),
-                                null, ImageProcessingStatus.FAILED));
-                continue;
-            }
+                // failed processing
+                if (isNull(processed.getProcessedImageId())) {
+                    allAcksKafkaTemplate.send(imagesDoneTopicName,
+                                    new ImageDoneDto(null, processed.getId().getRequestId(),
+                                            null, ImageProcessingStatus.FAILED))
+                            .get(1, TimeUnit.SECONDS);
+                    continue;
+                }
 
-            var filters = imageDto.getFilters();
-            filters.remove(0);
-            if (filters.isEmpty()) {
-                allAcksKafkaTemplate.send(imagesDoneTopicName,
-                        new ImageDoneDto(processed.getProcessedImageId(),processed.getId().getRequestId(),
-                                processed.getSizeBytes(), ImageProcessingStatus.DONE));
-            } else {
-                allAcksKafkaTemplate.send(imagesWipTopicName,
-                        new ImageWipDto(processed.getProcessedImageId(),processed.getId().getRequestId(),
-                                filters, imageDto.getExtension()));
+                var filters = imageDto.getFilters();
+                filters.remove(0);
+                if (filters.isEmpty()) {
+                    allAcksKafkaTemplate.send(imagesDoneTopicName,
+                                    new ImageDoneDto(processed.getProcessedImageId(), processed.getId().getRequestId(),
+                                            processed.getSizeBytes(), ImageProcessingStatus.DONE))
+                            .get(1, TimeUnit.SECONDS);
+                } else {
+                    allAcksKafkaTemplate.send(imagesWipTopicName,
+                                    new ImageWipDto(processed.getProcessedImageId(), processed.getId().getRequestId(),
+                                            filters, imageDto.getExtension()))
+                            .get(1, TimeUnit.SECONDS);
+                }
             }
+            allAcksKafkaTemplate.flush();
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new KafkaException("Unable to send to Kafka", e);
         }
-        allAcksKafkaTemplate.flush();
     }
 }
