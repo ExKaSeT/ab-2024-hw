@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import java.util.List;
 
 @Entity
 @Table(name = "images")
@@ -30,4 +31,9 @@ public class Image {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User user;
+
+    @OneToMany(mappedBy = "originalImage", orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<ImageProcessing> imageProcessing;
 }

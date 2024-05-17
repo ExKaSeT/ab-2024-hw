@@ -26,6 +26,15 @@ public class ImageService {
                 .orElseThrow(() -> new EntityNotFoundException("Image not found"));
     }
 
+    public Image saveMeta(String link, String originalName, int sizeBytes, User user) {
+        var image = new Image();
+        image.setLink(link);
+        image.setOriginalName(originalName);
+        image.setSizeBytes(sizeBytes);
+        image.setUser(user);
+        return imageRepository.save(image);
+    }
+
     public List<Image> getUserImageMetas(User user) {
         return imageRepository.findAllByUser(user);
     }
