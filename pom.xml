@@ -28,6 +28,8 @@
         <jsonwebtoken.version>0.12.3</jsonwebtoken.version>
         <checkstyle-maven-plugin.version>3.3.1</checkstyle-maven-plugin.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <com.giffing.bucket4j.spring.boot.starter.version>0.12.7</com.giffing.bucket4j.spring.boot.starter.version>
+        <com.bucket4j.version>8.10.1</com.bucket4j.version>
     </properties>
 
     <dependencyManagement>
@@ -68,6 +70,17 @@
                 <artifactId>minio</artifactId>
                 <version>8.5.2</version>
             </dependency>
+            <dependency>
+                <groupId>com.giffing.bucket4j.spring.boot.starter</groupId>
+                <artifactId>bucket4j-spring-boot-starter</artifactId>
+                <version>${com.giffing.bucket4j.spring.boot.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.bucket4j</groupId>
+                <artifactId>bucket4j-postgresql</artifactId>
+                <version>${com.bucket4j.version}</version>
+            </dependency>
+
 
             <!--    test    -->
             <dependency>

@@ -1,5 +1,6 @@
 package edu.example.springmvcdemo.service;
 
+import com.giffing.bucket4j.spring.boot.starter.context.RateLimiting;
 import edu.example.springmvcdemo.config.AllowedImageExtension;
 import edu.example.springmvcdemo.dto.image_processing.ImageDoneDto;
 import edu.example.springmvcdemo.dto.image_processing.ImageWipDto;
@@ -39,6 +40,11 @@ public class ImageProcessingKafkaService {
     * Худший редкий кейс - транзакция не закомитится в бд и сообщение отправится в кафку ->
     * в consumer надо проверять существует ли такой requestId
     * */
+    @RateLimiting(
+            name = "apply-filters-limit",
+            cacheKey= "@userDetailsServiceImpl.getUsername()",
+            ratePerMethod = true
+    )
     @Transactional
     @Retryable(retryFor = {KafkaException.class, RecoverableDataAccessException.class,
             TransientDataAccessException.class}, backoff = @Backoff(delay = 500))
