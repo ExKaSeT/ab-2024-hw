@@ -5,5 +5,6 @@ public enum ImageProcessingFilter {
     TO_GREEN,
     TO_BLUE,
     ROTATE_90_CLOCKWISE,
-    BORDER_SELECTION
+    BORDER_SELECTION,
+    TAGGING
 }
