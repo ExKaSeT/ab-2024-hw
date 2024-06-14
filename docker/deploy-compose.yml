@@ -266,7 +266,7 @@ services:
       - MINIO_DATASOURCE_PASSWORD=minioadmin
       - MINIO_DATASOURCE_URL=http://minio:9000
       - MINIO_BUCKET_NAME=data
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-rotate:5432/postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-border:5432/postgres
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_SHOW_SQL=true
@@ -276,6 +276,43 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:29092,kafka-2:29093,kafka-3:29094
       - SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING=zookeeper:2181
 
+  postgres-tagging:
+    image: postgres:15.5
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    ports:
+      - "5438:5432"
+    volumes:
+      - pg-data-tagging:/var/lib/postgresql/data
+
+  image-editor-tagging:
+    image: image-editor:0.0.1
+    entrypoint: [ "java", "-jar", "/app/processors.jar" ]
+    depends_on:
+      - image-editor-api
+      - minio
+      - zookeeper
+      - postgres-tagging
+    environment:
+      - MINIO_DATASOURCE_USERNAME=minioadmin
+      - MINIO_DATASOURCE_PASSWORD=minioadmin
+      - MINIO_DATASOURCE_URL=http://minio:9000
+      - MINIO_BUCKET_NAME=data
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-tagging:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+      - PROCESSOR_TYPE=TAGGING
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:29092,kafka-2:29093,kafka-3:29094
+      - SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING=zookeeper:2181
+      - IMAGGA_TAGGER_UPLOAD_IMAGE_URL=https://api.imagga.com/v2/uploads
+      - IMAGGA_TAGGER_GET_IMAGE_TAGS_URL=https://api.imagga.com/v2/tags
+      - IMAGGA_TAGGER_API_KEY=
+      - IMAGGA_TAGGER_API_SECRET=
+
 volumes:
   pg-data:
   pg-data-to-red:
@@ -283,4 +320,5 @@ volumes:
   pg-data-to-blue:
   pg-data-rotate:
   pg-data-border:
+  pg-data-tagging:
   minio-data:
