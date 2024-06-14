@@ -45,3 +45,18 @@ spring:
 
 minio:
   ttl-days: 3
+
+bucket4j:
+  enabled: true
+  cache-to-use: custom
+  methods:
+    - name: imagga-get-tags-limit
+      cache-name: imagga-get-tags-limit
+      rate-limit:
+        num-tokens: 1
+        post-execute-condition: true # token consumes only after method executed (method throw ex - not consume)
+        bandwidths:
+          - capacity: 1000
+            time: 30
+            unit: Days
+            refill-speed: interval

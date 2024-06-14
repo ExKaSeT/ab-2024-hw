@@ -2,12 +2,13 @@ package edu.example.springmvcdemo.config;
 
 import edu.example.springmvcdemo.model.ImageProcessingFilter;
 import edu.example.springmvcdemo.processor.*;
+import edu.example.springmvcdemo.service.ImaggaIntegration;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestClient;
 
 @Configuration
 @NoArgsConstructor
@@ -21,8 +22,8 @@ public class ProcessorTypeConfig {
     }
 
     @Bean
-    public ImageProcessor getProcessor(RestClient restClient,
-                                       @Autowired(required = false) ImaggaImageTaggerConfig config) {
+    public ImageProcessor getProcessor(@Autowired(required = false)ImaggaIntegration imaggaIntegration,
+                                       CircuitBreakerFactory circuitBreakerFactory) {
         switch (type) {
             case TO_RED -> {
                 return new RgbFilter(RgbFilter.ColorFilter.RED);
@@ -40,7 +41,7 @@ public class ProcessorTypeConfig {
                 return new RobertsCrossEdgeDetector();
             }
             case TAGGING -> {
-                return new ImaggaImageTagger(restClient, config);
+                return new ImaggaImageTagger(imaggaIntegration, circuitBreakerFactory);
             }
             default -> throw new IllegalStateException("Specified processor is not implemented");
         }
