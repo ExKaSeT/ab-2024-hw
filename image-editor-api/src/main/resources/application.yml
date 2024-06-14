@@ -46,3 +46,16 @@ spring:
 
 app:
   group-id: ${GROUP_ID:api-group-id}
+
+bucket4j:
+  enabled: true
+  cache-to-use: custom # disable auto config
+  methods:
+    - name: apply-filters-limit
+      cache-name: apply-filters-limit
+      rate-limit:
+        num-tokens: 1
+        bandwidths: # maximum of 3 requests within 10 seconds
+          - capacity: 3
+            time: 10
+            unit: seconds

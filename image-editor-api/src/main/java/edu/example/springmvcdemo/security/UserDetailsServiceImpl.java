@@ -7,6 +7,8 @@ import edu.example.springmvcdemo.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,5 +37,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .collect(Collectors.toSet());
         return new UserDetailsImpl(user, roles);
+    }
+
+    public String getUsername() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        return ((UserDetailsImpl) securityContext.getAuthentication().getPrincipal()).getUsername();
     }
 }

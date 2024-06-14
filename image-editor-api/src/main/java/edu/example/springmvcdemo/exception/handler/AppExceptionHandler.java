@@ -1,5 +1,6 @@
 package edu.example.springmvcdemo.exception.handler;
 
+import com.giffing.bucket4j.spring.boot.starter.context.RateLimitException;
 import edu.example.springmvcdemo.dto.SuccessContainerDto;
 import edu.example.springmvcdemo.exception.EntityNotFoundException;
 import edu.example.springmvcdemo.security.exception.InvalidTokenException;
@@ -43,6 +44,11 @@ public class AppExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleException(EntityNotFoundException e) {
         return ResponseEntity.status(NOT_FOUND).body(new SuccessContainerDto(false, e.getMessage()));
+    }
+
+    @ExceptionHandler(RateLimitException.class)
+    public ResponseEntity<Object> handleException(RateLimitException e) {
+        return ResponseEntity.status(TOO_MANY_REQUESTS).body(new SuccessContainerDto(false, "Too many requests"));
     }
 
     @ExceptionHandler(Exception.class)

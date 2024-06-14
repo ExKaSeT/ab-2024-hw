@@ -28,6 +28,10 @@
         <jsonwebtoken.version>0.12.3</jsonwebtoken.version>
         <checkstyle-maven-plugin.version>3.3.1</checkstyle-maven-plugin.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <com.giffing.bucket4j.spring.boot.starter.version>0.12.7</com.giffing.bucket4j.spring.boot.starter.version>
+        <com.bucket4j.version>8.10.1</com.bucket4j.version>
+        <org.apache.httpcomponents.version>5.3.1</org.apache.httpcomponents.version>
+        <spring-cloud-starter-circuitbreaker-resilience4j.version>3.1.1</spring-cloud-starter-circuitbreaker-resilience4j.version>
     </properties>
 
     <dependencyManagement>
@@ -68,6 +72,27 @@
                 <artifactId>minio</artifactId>
                 <version>8.5.2</version>
             </dependency>
+            <dependency>
+                <groupId>com.giffing.bucket4j.spring.boot.starter</groupId>
+                <artifactId>bucket4j-spring-boot-starter</artifactId>
+                <version>${com.giffing.bucket4j.spring.boot.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.bucket4j</groupId>
+                <artifactId>bucket4j-postgresql</artifactId>
+                <version>${com.bucket4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>${org.apache.httpcomponents.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+                <version>${spring-cloud-starter-circuitbreaker-resilience4j.version}</version>
+            </dependency>
+
 
             <!--    test    -->
             <dependency>
